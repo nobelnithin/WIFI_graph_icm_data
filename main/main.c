@@ -34,17 +34,18 @@ static const char *TAGS = "wifi softAP";
 #ifndef APP_CPU_NUM
 #define APP_CPU_NUM PRO_CPU_NUM
 #endif
-int16_t raw_reading;
+
+float lin_accel_y=0.0;
 /* Find gpio definitions in sdkconfig */
 
 esp_err_t root_get_handler(httpd_req_t *req)
 {
 
     char response[32];
-    snprintf(response, sizeof(response), "%d", raw_reading);
+    snprintf(response, sizeof(response), "%.2f", lin_accel_y);
     httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
 
-    ESP_LOGI(TAGS, "Sent random number: %d", raw_reading);
+    ESP_LOGI(TAGS, "Sent random number: %.2f", lin_accel_y);
     return ESP_OK;
 }
 
@@ -141,22 +142,22 @@ void icm42670_test(void *pvParameters)
 
     
     uint8_t data_register;
-
+    int16_t raw_reading;
     /* select which acceleration or gyro value should be read: */
     // data_register = ICM42670_REG_ACCEL_DATA_X1;
-    // data_register = ICM42670_REG_ACCEL_DATA_Y1;
+    data_register = ICM42670_REG_ACCEL_DATA_Y1;
     // data_register = ICM42670_REG_ACCEL_DATA_Z1;
-    data_register = ICM42670_REG_GYRO_DATA_X1;
+    // data_register = ICM42670_REG_GYRO_DATA_X1;
     // data_register = ICM42670_REG_GYRO_DATA_Y1;
     // data_register = ICM42670_REG_GYRO_DATA_Z1;
-
+    int g = 0;
     // now poll selected accelerometer or gyro raw value directly from registers
     while (1)
     {
         ESP_ERROR_CHECK(icm42670_read_raw_data(&dev, data_register, &raw_reading));
-
-        ESP_LOGI(TAG, "Raw accelerometer / gyro reading: %d", raw_reading);
-
+        g = 0.9 * g + 0.1*raw_reading;
+        // ESP_LOGI(TAG, "Raw accelerometer / gyro reading: %d", raw_reading);
+        lin_accel_y = raw_reading - g;
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

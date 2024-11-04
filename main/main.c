@@ -37,7 +37,7 @@ static const char *TAGS = "wifi softAP";
 #endif
 
 float lin_accel_y = 0.0;
-int received_number = 0; // Variable to store the received number
+int thres = -325;
 
 esp_err_t number_post_handler(httpd_req_t *req)
 {
@@ -46,8 +46,8 @@ esp_err_t number_post_handler(httpd_req_t *req)
     if (httpd_req_get_url_query_str(req, buf, sizeof(buf)) == ESP_OK) {
         // Parse the number from the query string
         if (httpd_query_key_value(buf, "number", buf, sizeof(buf)) == ESP_OK) {
-            received_number = atoi(buf); // Convert to integer
-            ESP_LOGI(TAG, "Received number: %d", received_number);
+            thres = atoi(buf); // Convert to integer
+            // ESP_LOGI(TAG, "Received number: %d", thres);
             httpd_resp_send(req, "Number received", HTTPD_RESP_USE_STRLEN);
             return ESP_OK;
         }
@@ -62,8 +62,8 @@ esp_err_t number_post_handler(httpd_req_t *req)
 esp_err_t root_get_handler(httpd_req_t *req)
 {
     char response[64];
-    float thres = -325.00;
-    snprintf(response, sizeof(response), "%.2f, %.2f", lin_accel_y, thres);
+    
+    snprintf(response, sizeof(response), "%.2f, %d", lin_accel_y, thres);
     httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
 
     // ESP_LOGI(TAGS, "Sent linear data and threshold: %.2f, %.2f", lin_accel_y, thres);

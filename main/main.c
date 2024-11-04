@@ -41,11 +41,12 @@ float lin_accel_y=0.0;
 esp_err_t root_get_handler(httpd_req_t *req)
 {
 
-    char response[32];
-    snprintf(response, sizeof(response), "%.2f", lin_accel_y);
+    char response[64];
+    float thres = -325.00;
+    snprintf(response, sizeof(response), "%.2f, %.2f", lin_accel_y, thres);
     httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
 
-    ESP_LOGI(TAGS, "Sent random number: %.2f", lin_accel_y);
+    ESP_LOGI(TAGS, "Sent linear data and threshold: %.2f , %.2f", lin_accel_y, thres);
     return ESP_OK;
 }
 
